@@ -1,6 +1,6 @@
 BOXES = ['ubuntu-12.04.3-amd64-vbox.box', 'ubuntu-12.04.3-amd64-vmwarefusion.box']
 WEBSERVER = "juvia-helper.phusion.nl"
-WEBROOT = "/srv/oss_binaries_passenger/vagrant/boxes/"
+WEBROOT = "/srv/oss_binaries_passenger/vagrant/boxes"
 
 desc "Build VirtualBox box & import into Vagrant"
 task :virtualbox => 'ubuntu-12.04.3-amd64-vbox.box' do
