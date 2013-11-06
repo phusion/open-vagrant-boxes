@@ -9,7 +9,7 @@ Veewee::Session.declare({
   :iso_src => "http://releases.ubuntu.com/12.04/ubuntu-12.04.3-server-amd64.iso",
   :iso_md5 => 'a8c667e871f48f3a662f3fbf1c3ddb17',
   :iso_download_timeout => "1000",
-  :boot_wait => "4",
+  :boot_wait => "10",
   :boot_cmd_sequence => [
     '<Esc><Esc><Enter>',
     '/install/vmlinuz noapic preseed/url=http://%IP%:%PORT%/preseed.cfg ',
