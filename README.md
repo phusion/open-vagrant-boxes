@@ -2,6 +2,12 @@ This repository contains definitions for the Phusion [Vagrant](http://www.vagran
 
 These definitions makes building boxes quick and unambigious. The entire building process is described in the definitions; no manual intervention is required.
 
+Phusion's boxes differ from the ones provided in by vagrantup.com in the following ways:
+
+ * We provide a bigger virtual hard disk: around 40 GB.
+ * We use LVM so that partitioning is easier.
+ * Our default kernel version is 3.8, so that it's easy to use [Docker](http://www.docker.io/).
+
 ## Environment setup
 
  1. Install [Vagrant](http://www.vagrantup.com/).
