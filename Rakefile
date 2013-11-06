@@ -1,4 +1,6 @@
 BOXES = ['ubuntu-12.04.3-amd64-vbox.box', 'ubuntu-12.04.3-amd64-vmwarefusion.box']
+WEBSERVER = "juvia-helper.phusion.nl"
+WEBROOT = "/srv/oss_binaries_passenger/vagrant/boxes/"
 
 desc "Build VirtualBox box & import into Vagrant"
 task :virtualbox => 'ubuntu-12.04.3-amd64-vbox.box' do
@@ -25,7 +27,9 @@ end
 desc "Upload boxes to a public server"
 task :upload => BOXES do
 	BOXES.each do |box|
-		sh "scp", box, "juvia-helper.phusion.nl:/srv/vagrant-boxes/"
+		sh "ssh", WEBSERVER, "rm -rf #{WEBROOT}/tmp && mkdir #{WEBROOT}/tmp"
+		sh "scp", box, "#{WEBSERVER}:#{WEBROOT}/tmp/"
+		sh "md5sum #{box} | ssh #{WEBSERVER} tee #{WEBROOT}/tmp/#{box}.md5.txt"
+		sh "ssh", WEBSERVER, "mv #{WEBROOT}/tmp/* #{WEBROOT}/ && rm -rf #{WEBROOT}/tmp"
 	end
-	sh "md5sum #{BOXES.join(' ')} | ssh juvia-helper.phusion.nl tee /srv/vagrant-boxes/md5sums.txt"
 end
