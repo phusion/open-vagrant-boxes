@@ -1,0 +1,75 @@
+GIT
+  remote: git://github.com/jedi4ever/veewee.git
+  revision: fdd07122b66d460d03a093afef45a32fc94a5595
+  specs:
+    veewee (0.3.7)
+      ansi (~> 1.3.0)
+      childprocess
+      fission (= 0.4.0)
+      fog (~> 1.8)
+      grit
+      highline
+      i18n
+      json
+      net-ssh (>= 2.2.0)
+      popen4 (~> 0.1.2)
+      progressbar
+      ruby-vnc (~> 1.0.0)
+      thor (~> 0.15)
+
+GEM
+  remote: https://www.rubygems.org/
+  specs:
+    CFPropertyList (2.0.17)
+      libxml-ruby (>= 1.1.0)
+      rake (>= 0.7.0)
+    Platform (0.4.0)
+    ansi (1.3.0)
+    builder (3.2.2)
+    childprocess (0.3.9)
+      ffi (~> 1.0, >= 1.0.11)
+    diff-lcs (1.2.4)
+    excon (0.22.1)
+    ffi (1.8.1)
+    fission (0.4.0)
+      CFPropertyList (~> 2.0.17)
+    fog (1.11.1)
+      builder
+      excon (~> 0.20)
+      formatador (~> 0.2.0)
+      json (~> 1.7)
+      mime-types
+      net-scp (~> 1.1)
+      net-ssh (>= 2.1.3)
+      nokogiri (~> 1.5.0)
+      ruby-hmac
+    formatador (0.2.4)
+    grit (2.5.0)
+      diff-lcs (~> 1.1)
+      mime-types (~> 1.15)
+      posix-spawn (~> 0.3.6)
+    highline (1.6.19)
+    i18n (0.6.4)
+    json (1.8.0)
+    libxml-ruby (2.6.0)
+    mime-types (1.23)
+    net-scp (1.1.1)
+      net-ssh (>= 2.6.5)
+    net-ssh (2.6.7)
+    nokogiri (1.5.9)
+    open4 (1.3.0)
+    popen4 (0.1.2)
+      Platform (>= 0.4.0)
+      open4 (>= 0.4.0)
+    posix-spawn (0.3.6)
+    progressbar (0.20.0)
+    rake (10.0.4)
+    ruby-hmac (0.4.0)
+    ruby-vnc (1.0.1)
+    thor (0.18.1)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  veewee!
