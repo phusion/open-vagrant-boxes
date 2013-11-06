@@ -35,6 +35,7 @@ Veewee::Session.declare({
     "vagrant.sh",
     "#{env.current_provider}.sh",
     "chef.sh",
+    "puppet.sh",
     "cleanup.sh"
   ],
   :postinstall_timeout => "10000"
