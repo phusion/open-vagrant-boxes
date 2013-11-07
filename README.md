@@ -8,6 +8,8 @@ Phusion's boxes differ from the ones provided in by vagrantup.com in the followi
  * We use LVM so that partitioning is easier.
  * Our default kernel version is 3.8, so that it's easy to use [Docker](http://www.docker.io/).
 
+Prebuilt boxes are available at https://oss-binaries.phusionpassenger.com/vagrant/boxes/
+
 ## Environment setup
 
  1. Install [Vagrant](http://www.vagrantup.com/).
