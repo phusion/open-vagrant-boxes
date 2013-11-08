@@ -7,6 +7,7 @@ Phusion's boxes differ from the ones provided in by vagrantup.com in the followi
  * We provide a bigger virtual hard disk: around 40 GB.
  * We use LVM so that partitioning is easier.
  * Our default kernel version is 3.8, so that it's easy to use [Docker](http://www.docker.io/).
+ * The memory cgroup and swap accounting are turned on, for some Docker features.
 
 Prebuilt boxes are available at https://oss-binaries.phusionpassenger.com/vagrant/boxes/
 
