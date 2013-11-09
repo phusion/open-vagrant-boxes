@@ -4,7 +4,7 @@ WEBROOT = "/srv/oss_binaries_passenger/vagrant/boxes"
 
 desc "Build VirtualBox box & import into Vagrant"
 task :virtualbox => 'ubuntu-12.04.3-amd64-vbox.box' do
-	sh "vagrant box add phusion-ubuntu-12.04-amd64 ubuntu-12.04.3-amd64-vbox.box --force"
+	sh "vagrant box add phusion-open-ubuntu-12.04-amd64 ubuntu-12.04.3-amd64-vbox.box --force"
 end
 
 desc "Build VirtualBox box"
@@ -15,7 +15,7 @@ end
 
 desc "Build VMWare Fusion box & import into Vagrant"
 task :vmware_fusion => 'ubuntu-12.04.3-amd64-vmwarefusion.box' do
-	sh "vagrant box add phusion-ubuntu-12.04-amd64 ubuntu-12.04.3-amd64-vmwarefusion.box --force"
+	sh "vagrant box add phusion-open-ubuntu-12.04-amd64 ubuntu-12.04.3-amd64-vmwarefusion.box --force"
 end
 
 desc "Build VMWare Fusion box"
