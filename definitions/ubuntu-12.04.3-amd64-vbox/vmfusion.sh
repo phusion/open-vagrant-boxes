@@ -11,7 +11,7 @@ aptitude -y install dkms
 export VMTOOLS_DEVICE=/home/vagrant/linux.iso
 export VMTOOLS_MOUNT=/mnt/cdrom
 
-set +e
+set +x
 
 ###################
 
@@ -115,7 +115,12 @@ fi
 for TAR in /tmp/vmware-tools-distrib/lib/modules/source/*.tar; 
 do 
   echo -n "Extracting $TAR: "
-  tar -C /usr/src/vmware-tools-$VERSION -xf $TAR >/dev/null 2>&1 && echo "Ok" || echo "Error"
+  if tar -C /usr/src/vmware-tools-$VERSION -xf $TAR >/dev/null 2>&1; then
+    echo "Ok"
+  else
+    echo "Error"
+    exit 7
+  fi
 done
 
 echo -n "Generating /usr/src/vmware-tools-$VERSION/dkms.conf: "
@@ -153,9 +158,97 @@ AUTOINSTALL="YES"
 EOF
 echo "Ok"
 
+# Fix bugs in vmware-tools
+# http://erikbryantology.blogspot.nl/2013/03/patching-vmware-tools-in-fedora-18.html
+echo -n "Patching vmware-tools: "
+(
+  set -e
+  cd /usr/src/vmware-tools-$VERSION
+  patch -N -p0 >/dev/null 2>/dev/null <<"EOF"
+--- vmci-only/linux/driver.c  2012-08-16 05:53:18.000000000 +1000
++++ vmci-only3.8rc4/linux/driver.c  2013-01-23 11:19:10.325897824 +1100
+@@ -124,7 +124,7 @@
+    .name     = "vmci",
+    .id_table = vmci_ids,
+    .probe = vmci_probe_device,
+-   .remove = __devexit_p(vmci_remove_device),
++   .remove = vmci_remove_device,
+ };
+ 
+ #if LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 19)
+@@ -1750,7 +1750,7 @@
+  *-----------------------------------------------------------------------------
+  */
+ 
+-static int __devinit
++static int
+ vmci_probe_device(struct pci_dev *pdev,           // IN: vmci PCI device
+                   const struct pci_device_id *id) // IN: matching device ID
+ {
+@@ -1978,7 +1978,7 @@
+  *-----------------------------------------------------------------------------
+  */
+ 
+-static void __devexit
++static void
+ vmci_remove_device(struct pci_dev* pdev)
+ {
+    struct vmci_device *dev = pci_get_drvdata(pdev);
+EOF
+  for DIR in */shared; do
+    (
+      cd $DIR
+      patch -N -p0 >/dev/null 2>/dev/null <<"EOF"
+--- ./compat_mm.h 2013-03-04 01:36:39.184925478 -0800
++++ ./compat_mm.h 2013-03-04 01:40:37.793728289 -0800
+@@ -91,8 +91,9 @@
+ 
+ /*
+  * In 2.4.10, vmtruncate was changed from returning void to returning int.
++ * In 3.8.0,  vmtruncate was removed
+  */
+-#if LINUX_VERSION_CODE < KERNEL_VERSION(2, 4, 10)
++#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 8, 0)
+ #define compat_vmtruncate(inode, size)                                        \
+ ({                                                                            \
+    int result = 0;                                                            \
+@@ -100,7 +101,16 @@
+    result;                                                                    \
+ })
+ #else
+-#define compat_vmtruncate(inode, size) vmtruncate(inode, size)
++#define compat_vmtruncate(inode, size)                                        \
++({                                                                            \
++   result = inode_newsize_ok(inode, size);                                    \
++   if (!result)                                                               \
++   {                                                                          \
++      truncate_setsize(inode, size);                                          \
++   }                                                                          \
++   result;                                                                    \
++})
++
+ #endif
+
+
+EOF
+    )
+  done
+)
+if [[ "$?" = 0 ]]; then
+  echo "Ok"
+else
+  echo "Error"
+  exit 7
+fi
+
 if ! dpkg -L dkms >/dev/null 2>&1; then
   echo "Installing dkms: " 
-  apt-get -qq install dkms >/dev/null 2>&1 && echo "Ok" || echo "Error"
+  if apt-get -qq -y install dkms >/dev/null 2>&1; then
+    echo "Ok"
+  else
+    echo "Error"
+    exit 7
+  fi
 else 
   if dkms status | grep -q "^vmware-tools" ; then 
     echo -n "Removing old dkms definitions: "
@@ -173,35 +266,70 @@ fi
 DISTRIB=$(uname -r | cut -d- -f3)
 if ! dpkg -L linux-headers-$DISTRIB >/dev/null 2>&1; then
   echo -n "Installing linux-headers-$DISTRIB: "
-  apt-get -qq install linux-headers-$DISTRIB >/dev/null 2>&1 && echo "Ok" || echo "Error"
+  if apt-get -qq -y install linux-headers-$DISTRIB >/dev/null 2>&1; then
+    echo "Ok"
+  else
+    echo "Error"
+    exit 7
+  fi
 fi
 
 if ! dpkg -L linux-headers-$(uname -r) >/dev/null 2>&1; then
   echo -n "Installing linux-headers-$(uname -r): " 
-  apt-get -qq install linux-headers-$(uname -r) >/dev/null 2>&1 && echo "Ok" || echo "Error"
+  if apt-get -qq -y install linux-headers-$(uname -r) >/dev/null 2>&1; then
+    echo "Ok"
+  else
+    echo "Error"
+    exit 7
+  fi
 fi
 
 if ! dpkg -L build-essential >/dev/null 2>&1; then 
   echo -n "Installing build-essential: "
-  apt-get -qq install build-essential >/dev/null 2>&1 && echo "Ok" || echo "Error"
+  if apt-get -qq -y install build-essential >/dev/null 2>&1; then
+    echo "Ok"
+  else
+    echo "Error"
+    exit 7
+  fi
 fi
 
 echo -n "Adding vmware-tools to dkms: "
-dkms add -m vmware-tools -v $VERSION >/dev/null 2>&1 && echo "Ok" || echo "Error"
+if dkms add -m vmware-tools -v $VERSION >/dev/null 2>&1; then
+  echo "Ok"
+else
+  echo "Error"
+  exit 7
+fi
 echo -n "Building kernel modules for $(uname -r): "
-dkms build -m vmware-tools -v $VERSION -k $(uname -r) >/dev/null 2>&1 && echo "Ok" || echo "Error"
+if dkms build -m vmware-tools -v $VERSION -k $(uname -r) >/dev/null 2>&1; then
+  echo "Ok"
+else
+  echo "Error"
+  exit 7
+fi
 echo -n "Installing kernel modules for $(uname -r): "
-dkms install --force -m vmware-tools -v $VERSION -k $(uname -r) >/dev/null 2>&1 && echo "Ok" || echo "Error"
+if dkms install --force -m vmware-tools -v $VERSION -k $(uname -r) >/dev/null 2>&1; then
+  echo "Ok"
+else
+  echo "Error"
+  exit 7
+fi
 
 echo -n "Installing vmware-tools: "
-perl /tmp/vmware-tools-distrib/vmware-install.pl -d >/dev/null 2>&1 && echo "Ok" || echo "Error"
+if perl /tmp/vmware-tools-distrib/vmware-install.pl -d >/dev/null 2>&1; then
+  echo "Ok"
+else
+  echo "Error"
+  exit 7
+fi
 
 echo -n "Patching vmware-tools: "
 (
-	set -e
-	cd /etc/vmware-tools
-	# Allow vmware-tools to load kernel modules compiled by DKMS.
-	patch -p0 >/dev/null 2>&1 <<"EOF"
+  set -e
+  cd /etc/vmware-tools
+  # Allow vmware-tools to load kernel modules compiled by DKMS.
+  patch -N -p0 >/dev/null 2>&1 <<"EOF"
 --- services.sh.orig    2013-07-12 15:21:22.734631410 +0000
 +++ services.sh 2013-07-12 15:31:04.786088356 +0000
 @@ -866,7 +866,8 @@
@@ -215,19 +343,21 @@ echo -n "Patching vmware-tools: "
  }
 
 EOF
-	sed -i 's/^answer VMHGFS_CONFED no$/answer VMHGFS_CONFED yes/' locations
+  sed -i 's/^answer VMHGFS_CONFED no$/answer VMHGFS_CONFED yes/' locations
 )
 if [[ "$?" = 0 ]]; then
   echo "Ok"
 else
   echo "Error"
+  exit 7
 fi
 
 echo "Done"
 
 ###################
 
-set -e
+set -x
+
 rm /home/vagrant/linux.iso
 umount /mnt/cdrom
 
