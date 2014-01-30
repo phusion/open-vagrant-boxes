@@ -1,3 +1,5 @@
+# Docker-compatible Vagrant base boxes
+
 This repository contains definitions for the Phusion [Vagrant](http://www.vagrantup.com/) base boxes. Definitions are created using [Veewee](https://github.com/jedi4ever/veewee).
 
 These definitions makes building boxes quick and unambigious. The entire building process is described in the definitions; no manual intervention is required.
