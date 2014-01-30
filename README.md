@@ -13,7 +13,7 @@ Phusion's boxes differ from the ones provided in by vagrantup.com in the followi
 
 Prebuilt boxes are available at https://oss-binaries.phusionpassenger.com/vagrant/boxes/
 
-## About
+### About
 
 [<img src="http://www.phusion.nl/assets/logo.png">](http://www.phusion.nl/)
 
