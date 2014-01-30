@@ -1,3 +1,16 @@
+Files inside this repository are licensed under the MIT license, as found
+below. The built products are not necessarily MIT licensed; for example
+the resulting virtual machine contains many GPL components, and may even
+contain proprietary components (as is the case with the VMWare Fusion images,
+which include the VMWare Tools). Each component is copyrighted by their
+respective authors.
+
+VMWare Fusion is a registered trademark of VMWare Inc.
+VMWare Tools is probably also a trademark (not sure whether registered) of
+VMWare Inc.
+
+--------------------
+
 Copyright (c) 2013-2014 Phusion
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
