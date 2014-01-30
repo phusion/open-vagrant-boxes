@@ -33,11 +33,17 @@ Veewee::Session.declare({
   :postinstall_files => [
     "base.sh",
     "vagrant.sh",
+    "../../iso/_latest_vmware_tools.tar.gz",
     "#{env.current_provider}.sh",
     "chef.sh",
     "puppet.sh",
     "memory_swap_accounting.sh",
     "cleanup.sh"
   ],
-  :postinstall_timeout => "10000"
+  :postinstall_timeout => "10000",
+  :vmfusion => {
+    :vm_options => {
+      'download_tools' => false
+    }
+  }
 })

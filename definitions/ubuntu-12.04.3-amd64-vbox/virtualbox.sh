@@ -8,8 +8,8 @@ set +e
 /etc/init.d/virtualbox-ose-guest-utils stop
 rmmod vboxguest
 set -e
-aptitude -y purge virtualbox-ose-guest-x11 virtualbox-ose-guest-dkms virtualbox-ose-guest-utils
-aptitude -y install dkms
+apt-get -y purge virtualbox-ose-guest-x11 virtualbox-ose-guest-dkms virtualbox-ose-guest-utils
+apt-get -y install dkms
 
 # Install the VirtualBox guest additions
 VBOX_VERSION=$(cat /home/vagrant/.vbox_version)
@@ -24,7 +24,7 @@ umount /mnt
 
 # Now that the VirtualBox guest additions are installed, we can upgrade the kernel
 apt-get -y dist-upgrade
-aptitude -y install linux-generic-lts-quantal linux-headers-generic-lts-quantal
+apt-get -y install linux-generic-lts-raring linux-headers-generic-lts-raring
 
 #Cleanup VirtualBox
 rm $VBOX_ISO

@@ -1,15 +1,11 @@
 set -ex
 
 cd /tmp
-mkdir -p /mnt/cdrom
-mkdir -p /mnt/hgfs
-mount -o loop /home/vagrant/linux.iso /mnt/cdrom
 
-aptitude -y purge virtualbox-ose-guest-x11 virtualbox-ose-guest-dkms virtualbox-ose-guest-utils
-aptitude -y install dkms
+apt-get -y purge virtualbox-ose-guest-x11 virtualbox-ose-guest-dkms virtualbox-ose-guest-utils
+apt-get -y install dkms
 
-export VMTOOLS_DEVICE=/home/vagrant/linux.iso
-export VMTOOLS_MOUNT=/mnt/cdrom
+export VMTOOLS_ARCHIVE=/home/vagrant/_latest_vmware_tools.tar.gz
 
 set +x
 
@@ -49,79 +45,123 @@ if [ "$USER" != "root" ]; then
   exit 255
 fi
 
-if [ "$VMTOOLS_DEVICE" = "" -a "$VMTOOLS_MOUNT" = "" ]; then
-  FSTAB=$(awk '/cdrom/{printf "%s %s\n", $1, $2}' /etc/fstab);
+if [ "$VMTOOLS_ARCHIVE" = "" ]; then
+  if [ "$VMTOOLS_DEVICE" = "" -a "$VMTOOLS_MOUNT" = "" ]; then
+    FSTAB=$(awk '/cdrom/{printf "%s %s\n", $1, $2}' /etc/fstab);
 
-  if [ "$FSTAB" = "" ]; then
-    echo "Can't find CD-ROM in /etc/fstab: please set \$VMTOOLS_DEVICE and \$VMTOOLS_MOUNT" >&2
-    exit 1
+    if [ "$FSTAB" = "" ]; then
+      echo "Can't find CD-ROM in /etc/fstab: please set \$VMTOOLS_DEVICE and \$VMTOOLS_MOUNT" >&2
+      exit 1
+    fi
+
+    if [ $(echo $FSTAB | wc -l) -gt 1 ]; then
+      echo "More than one CD-ROM device: please set \$VMTOOLS_DEVICE and \$VMTOOLS_MOUNT" >&2
+      exit 1
+    fi
+    VMTOOLS_DEVICE=$(echo $FSTAB | cut -d\  -f1)
+    VMTOOLS_MOUNT=$(echo $FSTAB | cut -d\  -f2)
   fi
 
-  if [ $(echo $FSTAB | wc -l) -gt 1 ]; then
-    echo "More than one CD-ROM device: please set \$VMTOOLS_DEVICE and \$VMTOOLS_MOUNT" >&2
-    exit 1
+  if [ ! -d $VMTOOLS_MOUNT ]; then
+    echo "Mount point directory missing" >%2
+    exit 2
   fi
-  VMTOOLS_DEVICE=$(echo $FSTAB | cut -d\  -f1)
-  VMTOOLS_MOUNT=$(echo $FSTAB | cut -d\  -f2)
-fi
 
-if [ ! -d $VMTOOLS_MOUNT ]; then
-  echo "Mount point directory missing" >%2
-  exit 2
-fi
-
-if mount | grep -q -F " on $VMTOOLS_MOUNT "; then
-  echo "Already mounted... skipping mounting" >&2
-else
-  echo -n "Mounting $VMTOOLS_DEVICE: "
-  if mount -o $VMTOOLS_MOUNT_OPTIONS $VMTOOLS_DEVICE $VMTOOLS_MOUNT >/dev/null 2>&1; then 
-    echo "Ok" 
-  else 
-    echo "Could not mount $VMTOOLS_DEVICE"
-    exit 4
-  fi
-fi
-
-VERSION=$(basename $(ls $VMTOOLS_MOUNT/VMwareTools-*.tar.gz | cut -d- -f2-) .tar.gz)
-
-if [ "$VERSION" = "" ]; then
-  echo "Could not validate VMware Tools version" >&2
-  exit 5
-else
-  echo "Starting installation of VMware Tools version $VERSION"
-fi
-
-if [ -d /usr/src/vmware-tools-$VERSION ]; then
-  echo -n "Removing old version of /usr/src/vmware-tools-${VERSION}: "
-  rm -rf /usr/src/vmware-tools-$VERSION >/dev/null 2>&1 && echo "Ok" || echo "Error"
-fi
-if ! mkdir -p /usr/src/vmware-tools-$VERSION >/dev/null 2>&1; then 
-  echo "Could not create /usr/src/vmware-tools-$VERSION"
-  exit 6
-fi
-
-if [ -d /tmp/vmware-tools-distrib ]; then
-  echo -n "Removing old version of /tmp/vmware-tools-distrib: "
-  rm -rf /tmp/vmware-tools-distrib >/dev/null 2>&1 && echo "Ok" || echo "Error"
-fi
-
-echo -n "Extracting VMwareTools-${VERSION}: "
-if tar -C /tmp -zxf $VMTOOLS_MOUNT/VMwareTools-$VERSION.tar.gz >/dev/null 2>&1; then 
-  echo "Ok"
-else 
-  echo "Error"
-  exit 7
-fi
-for TAR in /tmp/vmware-tools-distrib/lib/modules/source/*.tar; 
-do 
-  echo -n "Extracting $TAR: "
-  if tar -C /usr/src/vmware-tools-$VERSION -xf $TAR >/dev/null 2>&1; then
-    echo "Ok"
+  if mount | grep -q -F " on $VMTOOLS_MOUNT "; then
+    echo "Already mounted... skipping mounting" >&2
   else
+    echo -n "Mounting $VMTOOLS_DEVICE: "
+    if mount -o $VMTOOLS_MOUNT_OPTIONS $VMTOOLS_DEVICE $VMTOOLS_MOUNT >/dev/null 2>&1; then 
+      echo "Ok" 
+    else 
+      echo "Could not mount $VMTOOLS_DEVICE"
+      exit 4
+    fi
+  fi
+
+  VERSION=$(basename $(ls $VMTOOLS_MOUNT/VMwareTools-*.tar.gz | cut -d- -f2-) .tar.gz)
+
+  if [ "$VERSION" = "" ]; then
+    echo "Could not validate VMware Tools version" >&2
+    exit 5
+  else
+    echo "Starting installation of VMware Tools version $VERSION"
+  fi
+
+  if [ -d /usr/src/vmware-tools-$VERSION ]; then
+    echo -n "Removing old version of /usr/src/vmware-tools-${VERSION}: "
+    rm -rf /usr/src/vmware-tools-$VERSION >/dev/null 2>&1 && echo "Ok" || echo "Error"
+  fi
+  if ! mkdir -p /usr/src/vmware-tools-$VERSION >/dev/null 2>&1; then 
+    echo "Could not create /usr/src/vmware-tools-$VERSION"
+    exit 6
+  fi
+
+  if [ -d /tmp/vmware-tools-distrib ]; then
+    echo -n "Removing old version of /tmp/vmware-tools-distrib: "
+    rm -rf /tmp/vmware-tools-distrib >/dev/null 2>&1 && echo "Ok" || echo "Error"
+  fi
+
+  echo -n "Extracting VMwareTools-${VERSION}: "
+  if tar -C /tmp -zxf $VMTOOLS_MOUNT/VMwareTools-$VERSION.tar.gz >/dev/null 2>&1; then 
+    echo "Ok"
+  else 
     echo "Error"
     exit 7
   fi
-done
+  for TAR in /tmp/vmware-tools-distrib/lib/modules/source/*.tar; 
+  do 
+    echo -n "Extracting $TAR: "
+    if tar -C /usr/src/vmware-tools-$VERSION -xf $TAR >/dev/null 2>&1; then
+      echo "Ok"
+    else
+      echo "Error"
+      exit 7
+    fi
+  done
+else
+  if [ -d /tmp/vmware-tools-distrib ]; then
+    echo -n "Removing old version of /tmp/vmware-tools-distrib: "
+    rm -rf /tmp/vmware-tools-distrib >/dev/null 2>&1 && echo "Ok" || echo "Error"
+  fi
+
+  echo -n "Extracting VMwareTools: "
+  if tar -C /tmp -zxf $VMTOOLS_ARCHIVE >/dev/null 2>&1; then 
+    echo "Ok"
+  else 
+    echo "Error"
+    exit 7
+  fi
+
+  VERSION=$(cd /tmp/vmware-tools-distrib && grep -o -E "buildNr = '(.*)'" vmware-install.pl | sed -E "s/buildNr = '(.*)'/\1/; s/ build//")
+
+  if [ "$VERSION" = "" ]; then
+    echo "Could not validate VMware Tools version" >&2
+    exit 5
+  else
+    echo "Starting installation of VMware Tools version $VERSION"
+  fi
+
+  if [ -d /usr/src/vmware-tools-$VERSION ]; then
+    echo -n "Removing old version of /usr/src/vmware-tools-${VERSION}: "
+    rm -rf /usr/src/vmware-tools-$VERSION >/dev/null 2>&1 && echo "Ok" || echo "Error"
+  fi
+  if ! mkdir -p /usr/src/vmware-tools-$VERSION >/dev/null 2>&1; then 
+    echo "Could not create /usr/src/vmware-tools-$VERSION"
+    exit 6
+  fi
+
+  for TAR in /tmp/vmware-tools-distrib/lib/modules/source/*.tar; 
+  do 
+    echo -n "Extracting $TAR: "
+    if tar -C /usr/src/vmware-tools-$VERSION -xf $TAR >/dev/null 2>&1; then
+      echo "Ok"
+    else
+      echo "Error"
+      exit 7
+    fi
+  done
+fi
 
 echo -n "Generating /usr/src/vmware-tools-$VERSION/dkms.conf: "
 cat > /usr/src/vmware-tools-$VERSION/dkms.conf <<EOF
@@ -157,89 +197,6 @@ DEST_MODULE_LOCATION[5]="/kernel/drivers/misc"
 AUTOINSTALL="YES"
 EOF
 echo "Ok"
-
-# Fix bugs in vmware-tools
-# http://erikbryantology.blogspot.nl/2013/03/patching-vmware-tools-in-fedora-18.html
-echo -n "Patching vmware-tools: "
-(
-  set -e
-  cd /usr/src/vmware-tools-$VERSION
-  patch -N -p0 >/dev/null 2>/dev/null <<"EOF"
---- vmci-only/linux/driver.c  2012-08-16 05:53:18.000000000 +1000
-+++ vmci-only3.8rc4/linux/driver.c  2013-01-23 11:19:10.325897824 +1100
-@@ -124,7 +124,7 @@
-    .name     = "vmci",
-    .id_table = vmci_ids,
-    .probe = vmci_probe_device,
--   .remove = __devexit_p(vmci_remove_device),
-+   .remove = vmci_remove_device,
- };
- 
- #if LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 19)
-@@ -1750,7 +1750,7 @@
-  *-----------------------------------------------------------------------------
-  */
- 
--static int __devinit
-+static int
- vmci_probe_device(struct pci_dev *pdev,           // IN: vmci PCI device
-                   const struct pci_device_id *id) // IN: matching device ID
- {
-@@ -1978,7 +1978,7 @@
-  *-----------------------------------------------------------------------------
-  */
- 
--static void __devexit
-+static void
- vmci_remove_device(struct pci_dev* pdev)
- {
-    struct vmci_device *dev = pci_get_drvdata(pdev);
-EOF
-  for DIR in */shared; do
-    (
-      cd $DIR
-      patch -N -p0 >/dev/null 2>/dev/null <<"EOF"
---- ./compat_mm.h 2013-03-04 01:36:39.184925478 -0800
-+++ ./compat_mm.h 2013-03-04 01:40:37.793728289 -0800
-@@ -91,8 +91,9 @@
- 
- /*
-  * In 2.4.10, vmtruncate was changed from returning void to returning int.
-+ * In 3.8.0,  vmtruncate was removed
-  */
--#if LINUX_VERSION_CODE < KERNEL_VERSION(2, 4, 10)
-+#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 8, 0)
- #define compat_vmtruncate(inode, size)                                        \
- ({                                                                            \
-    int result = 0;                                                            \
-@@ -100,7 +101,16 @@
-    result;                                                                    \
- })
- #else
--#define compat_vmtruncate(inode, size) vmtruncate(inode, size)
-+#define compat_vmtruncate(inode, size)                                        \
-+({                                                                            \
-+   result = inode_newsize_ok(inode, size);                                    \
-+   if (!result)                                                               \
-+   {                                                                          \
-+      truncate_setsize(inode, size);                                          \
-+   }                                                                          \
-+   result;                                                                    \
-+})
-+
- #endif
-
-
-EOF
-    )
-  done
-)
-if [[ "$?" = 0 ]]; then
-  echo "Ok"
-else
-  echo "Error"
-  exit 7
-fi
 
 if ! dpkg -L dkms >/dev/null 2>&1; then
   echo "Installing dkms: " 
@@ -326,7 +283,7 @@ fi
 
 echo -n "Patching vmware-tools: "
 (
-  set -e
+  set +e
   cd /etc/vmware-tools
   # Allow vmware-tools to load kernel modules compiled by DKMS.
   patch -N -p0 >/dev/null 2>&1 <<"EOF"
@@ -358,9 +315,6 @@ echo "Done"
 
 set -x
 
-rm /home/vagrant/linux.iso
-umount /mnt/cdrom
-
 # Now that VMWare Tools are installed, we can upgrade the kernel
 apt-get -y dist-upgrade
-aptitude -y install linux-generic-lts-quantal linux-headers-generic-lts-quantal
+apt-get -y install linux-generic-lts-raring linux-headers-generic-lts-raring
