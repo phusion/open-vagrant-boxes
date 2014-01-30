@@ -1,7 +1,9 @@
 # Remove items used for building, since they aren't needed anymore
 set -x
 
-apt-get -y remove build-essential
+# We don't remove build-essential. It is required for recompiling the guest
+# additions after upgrading the kernel.
+
 apt-get -y autoremove
 apt-get clean
 

@@ -5,6 +5,8 @@ contain proprietary components (as is the case with the VMWare Fusion images,
 which include the VMWare Tools). Each component is copyrighted by their
 respective authors.
 
+The VMWare Tools' license can be found at https://www.vmware.com/download/eula/
+
 VMWare Fusion is a registered trademark of VMWare Inc.
 VMWare Tools is probably also a trademark (not sure whether registered) of
 VMWare Inc.

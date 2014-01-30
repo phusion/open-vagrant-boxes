@@ -12,8 +12,7 @@ set +x
 ###################
 
 #!/bin/bash
-# Automatic install and configure VMware Tools using DKMS 
-# dkms.conf is an modified version of open-vm-tools' dkms.conf
+# Automatic install and configure VMware Tools
 #
 # Idea for this script is from http://www.l4l.be/docs/virt/openvmtools_ubuntu810.php
 #
@@ -163,62 +162,6 @@ else
   done
 fi
 
-echo -n "Generating /usr/src/vmware-tools-$VERSION/dkms.conf: "
-cat > /usr/src/vmware-tools-$VERSION/dkms.conf <<EOF
-PACKAGE_NAME=vmware-tools
-PACKAGE_VERSION=$VERSION
-MAKE_CMD_TMPL="make VM_UNAME=\$kernelver \
-               MODULEBUILDDIR=\$dkms_tree/\$PACKAGE_NAME/\$PACKAGE_VERSION/build"
-
-MAKE[0]="\$MAKE_CMD_TMPL -C vmblock-only VM_UNAME=\$kernelver &&   \\
-         \$MAKE_CMD_TMPL -C vmci-only VM_UNAME=\$kernelver &&      \\
-         \$MAKE_CMD_TMPL -C vmhgfs-only VM_UNAME=\$kernelver &&    \\
-         \$MAKE_CMD_TMPL -C vmmemctl-only VM_UNAME=\$kernelver &&  \\
-         \$MAKE_CMD_TMPL -C vmxnet-only VM_UNAME=\$kernelver &&    \\
-         \$MAKE_CMD_TMPL -C vsock-only VM_UNAME=\$kernelver"
-BUILT_MODULE_NAME[0]="vmblock"
-BUILT_MODULE_NAME[1]="vmci"
-BUILT_MODULE_NAME[2]="vmhgfs"
-BUILT_MODULE_NAME[3]="vmmemctl"
-BUILT_MODULE_NAME[4]="vmxnet"
-BUILT_MODULE_NAME[5]="vsock"
-BUILT_MODULE_LOCATION[0]="vmblock-only/"
-BUILT_MODULE_LOCATION[1]="vmci-only/"
-BUILT_MODULE_LOCATION[2]="vmhgfs-only/"
-BUILT_MODULE_LOCATION[3]="vmmemctl-only/"
-BUILT_MODULE_LOCATION[4]="vmxnet-only/"
-BUILT_MODULE_LOCATION[5]="vsock-only/"
-DEST_MODULE_LOCATION[0]="/kernel/fs/vmblock"
-DEST_MODULE_LOCATION[1]="/kernel/drivers/misc"
-DEST_MODULE_LOCATION[2]="/kernel/fs/vmhgfs"
-DEST_MODULE_LOCATION[3]="/kernel/drivers/misc"
-DEST_MODULE_LOCATION[4]="/kernel/drivers/net"
-DEST_MODULE_LOCATION[5]="/kernel/drivers/misc"
-AUTOINSTALL="YES"
-EOF
-echo "Ok"
-
-if ! dpkg -L dkms >/dev/null 2>&1; then
-  echo "Installing dkms: " 
-  if apt-get -qq -y install dkms >/dev/null 2>&1; then
-    echo "Ok"
-  else
-    echo "Error"
-    exit 7
-  fi
-else 
-  if dkms status | grep -q "^vmware-tools" ; then 
-    echo -n "Removing old dkms definitions: "
-    for VRSN in $(dkms status | awk '/^vmware-tools/{ver=$2; gsub(/[,:]/, "",ver); printf "%s\n", ver;}'); 
-    do
-      dkms remove -m vmware-tools -v $VRSN --all >/dev/null 2>&1 && echo -n "$VRSN "
-      if [ -d /usr/src/vmware-tools-$VRSN -a "$VRSN" != "$VERSION" ]; then
-        rm -rf /usr/src/vmware-tools-$VRSN >/dev/null 2>&1
-      fi
-    done
-    echo
-  fi
-fi
 
 DISTRIB=$(uname -r | cut -d- -f3)
 if ! dpkg -L linux-headers-$DISTRIB >/dev/null 2>&1; then
@@ -251,22 +194,30 @@ if ! dpkg -L build-essential >/dev/null 2>&1; then
   fi
 fi
 
-echo -n "Adding vmware-tools to dkms: "
-if dkms add -m vmware-tools -v $VERSION >/dev/null 2>&1; then
-  echo "Ok"
-else
-  echo "Error"
-  exit 7
-fi
-echo -n "Building kernel modules for $(uname -r): "
-if dkms build -m vmware-tools -v $VERSION -k $(uname -r) >/dev/null 2>&1; then
-  echo "Ok"
-else
-  echo "Error"
-  exit 7
-fi
-echo -n "Installing kernel modules for $(uname -r): "
-if dkms install --force -m vmware-tools -v $VERSION -k $(uname -r) >/dev/null 2>&1; then
+
+echo -n "Patching vmware-tools: "
+set +e
+(
+  set -e
+  cd /tmp/vmware-tools-distrib
+  # Enable automatic recompiling of vmware-tools kernel modules on kernel upgrades.
+  patch -N -p0 >/dev/null 2>&1 <<"EOF"
+--- bin/vmware-config-tools.pl.orig 2014-01-30 17:56:40.570846915 +0100
++++ bin/vmware-config-tools.pl  2014-01-30 17:56:51.980548609 +0100
+@@ -10837,7 +10837,7 @@
+ EOF
+
+    $ans = get_persistent_answer($msg, 'AUTO_KMODS_ENABLED_ANSWER', 'yesno',
+-                                'no');
++                                'yes');
+    db_add_answer('AUTO_KMODS_ENABLED', $ans);
+ }
+
+EOF
+)
+status=$?
+set -e
+if [[ "$status" = 0 ]]; then
   echo "Ok"
 else
   echo "Error"
@@ -275,34 +226,6 @@ fi
 
 echo -n "Installing vmware-tools: "
 if perl /tmp/vmware-tools-distrib/vmware-install.pl -d >/dev/null 2>&1; then
-  echo "Ok"
-else
-  echo "Error"
-  exit 7
-fi
-
-echo -n "Patching vmware-tools: "
-(
-  set +e
-  cd /etc/vmware-tools
-  # Allow vmware-tools to load kernel modules compiled by DKMS.
-  patch -N -p0 >/dev/null 2>&1 <<"EOF"
---- services.sh.orig    2013-07-12 15:21:22.734631410 +0000
-+++ services.sh 2013-07-12 15:31:04.786088356 +0000
-@@ -866,7 +866,8 @@
-    local module_path="`vmware_getModPath $1`"
-    local module_name="`vmware_getModName $1`"
-    /sbin/insmod -s -f "$module_path" >/dev/null 2>&1 || \
--       /sbin/insmod -s -f "$module_name" >/dev/null 2>&1 || exit 1
-+       /sbin/insmod -s -f "$module_name" >/dev/null 2>&1 || \
-+       /sbin/modprobe "$module_name" >/dev/null 2>&1 || exit 1
-    return 0
- }
-
-EOF
-  sed -i 's/^answer VMHGFS_CONFED no$/answer VMHGFS_CONFED yes/' locations
-)
-if [[ "$?" = 0 ]]; then
   echo "Ok"
 else
   echo "Error"

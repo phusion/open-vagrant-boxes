@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/phusion/veewee.git
-  revision: 3631547617a41bb6a071ff01c00f7cb633c1e629
+  revision: aee7b127cd9ab9f4469157357a1bbda54af3be2a
   specs:
     veewee (0.3.12)
       ansi (~> 1.3.0)
@@ -78,4 +78,5 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  nokogiri
   veewee!

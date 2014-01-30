@@ -71,8 +71,8 @@ These Vagrant boxes are provided to you by [Phusion](http://www.phusion.nl/). Yo
 
 VirtualBox:
 
-    bundle exec rake virtualbox:build virtualbox:import
+    bundle exec rake virtualbox:all
 
 VMWare Fusion:
 
-    bundle exec rake vmware_fusion:build vmware_fusion:import
+    bundle exec rake vmware_fusion:all
