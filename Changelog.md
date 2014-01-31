@@ -4,6 +4,7 @@
  * Upgraded Veewee and reworked a lot stuff to make the build process more reliable.
  * The VirtualBox box is now compatible with VirtualBox <= 4.2.
  * Fixed some shared folder warnings when using the VirtualBox box. These warnings were caused by the fact that the box used to reference directories that only exist on the image building machine.
+ * The kernel has been upgraded to 3.8.0-35.
 
 ## 2013-11-09
 
