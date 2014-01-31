@@ -21,17 +21,19 @@ desc "Build VirtualBox box file"
 task "virtualbox:build_box" do
 	require 'nokogiri'
 	sh "bundle exec veewee vbox export ubuntu-12.04.3-amd64-vbox --force"
-	sh "rm -rf tmp && mkdir tmp && cd tmp && tar xf ../ubuntu-12.04-3-amd64-vbox.box"
+	sh "rm -rf tmp && mkdir tmp && cd tmp && tar xf ../ubuntu-12.04.3-amd64-vbox.box"
 	doc = Nokogiri.XML(File.open("tmp/box.ovf", "r"))
 	# Remove DVD device which could cause problems for older VirtualBoxes:
 	# https://github.com/phusion/open-vagrant-boxes/issues/1
 	(doc / "StorageControllers > StorageController[name='IDE Controller'] > AttachedDevice[port='1']").remove
-	# Remove all Shared Folders created by Veewee. Fixes some warnings.
+	# Remove all Shared Folders created by Veewee, since they reference
+	# directories that will not exist on machines other than the builder's.
+	# This removes some warnings.
 	(doc / "SharedFolder").remove
 	File.open("tmp/box.ovf", "w") do |f|
 		doc.write_xml_to(f)
 	end
-	sh "cd tmp && tar -cf ../ubuntu-12.04-3-amd64-vbox.box *"
+	sh "cd tmp && tar -cf ../ubuntu-12.04.3-amd64-vbox.box *"
 	sh "rm -rf tmp"
 end
 
@@ -58,20 +60,10 @@ task "vmware_fusion:fixup_image" do
 	# After building the box, the kernel has been upgraded. We have to boot it
 	# in the new kernel at least once so that the VMWare Tools are properly compiled
 	# for the new kernel.
-	require 'shellwords'
 	sh "bundle exec veewee fusion up ubuntu-12.04.3-amd64-vmwarefusion"
 	sh "sleep 10"
 	sh "chmod 600 vagrant_insecure.key"
-	ssh_command = %Q{
-		set -e
-		while ! sudo modprobe vmhgfs; do
-			echo "`date`: VMWare Tools not yet compiled. Waiting..." 
-			sleep 5
-		done
-		echo "`date`: VMWare Tools are now compiled. Powering off VM."
-		sudo poweroff
-	}
-	sh "bundle exec veewee fusion ssh ubuntu-12.04.3-amd64-vmwarefusion #{Shellwords.escape ssh_command}"
+	sh "bundle exec veewee fusion ssh ubuntu-12.04.3-amd64-vmwarefusion 'sudo bash /home/vagrant/_cleanup.sh vmfusion'"
 end
 
 desc "Build VMWare Fusion box file"

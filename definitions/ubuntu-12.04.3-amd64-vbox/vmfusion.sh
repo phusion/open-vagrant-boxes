@@ -3,7 +3,6 @@ set -ex
 cd /tmp
 
 apt-get -y purge virtualbox-ose-guest-x11 virtualbox-ose-guest-dkms virtualbox-ose-guest-utils
-apt-get -y install dkms
 
 export VMTOOLS_ARCHIVE=/home/vagrant/_latest_vmware_tools.tar.gz
 

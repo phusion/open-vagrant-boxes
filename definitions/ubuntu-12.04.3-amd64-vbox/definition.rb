@@ -38,7 +38,8 @@ Veewee::Session.declare({
     "chef.sh",
     "puppet.sh",
     "memory_swap_accounting.sh",
-    "cleanup.sh"
+    "_cleanup.sh",
+    "#{env.current_provider}_cleanup.sh"
   ],
   :postinstall_timeout => "10000",
   :vmfusion => {
