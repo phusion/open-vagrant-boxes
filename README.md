@@ -61,6 +61,7 @@ The prebuilt boxes are available at https://oss-binaries.phusionpassenger.com/va
 
 These Vagrant boxes are provided to you by [Phusion](http://www.phusion.nl/). You may want to check out these too:
 
+ * [Discussion forum](https://groups.google.com/forum/#!forum/passenger-docker) - For discussions about this project.
  * [Phusion Passenger](https://www.phusionpassenger.com/) - A fast, robust application server for Ruby, Python, Node.js, and Meteor.
  * [baseimage-docker](https://github.com/phusion/baseimage-docker) - A minimal Ubuntu Docker base image modified for Docker-friendliness.
  * [The Phusion blog](http://blog.phusion.nl) - For interesting articles and updates.
