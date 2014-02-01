@@ -1,3 +1,8 @@
+## 2014-02-01
+
+ * Downgraded VMWare Tools to 9.6.0-1294478 because of [a file corruption bug in HGFS](https://communities.vmware.com/thread/462303).
+ * The VMWare Fusion box now disables automatic updates of VMWare Tools, to prevent upgrading to the most recent version, which contains the HGFS file corruption bug.
+
 ## 2014-01-31
 
  * We now download and use a specific, recent version of VMWare Tools (9.6.1-1378637). This way the build will always succeed no matter which VMWare Fusion version the user is using. This version of VMWare Tools also happens to work with kernel 3.8 without needing patches.

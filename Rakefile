@@ -1,7 +1,11 @@
-VMWARE_TOOLS_URL = "http://softwareupdate.vmware.com/cds/vmw-desktop/fusion/6.0.2/1398658/packages/com.vmware.fusion.tools.linux.zip.tar"
-VMWARE_TOOLS_ARCHIVE = "VMwareTools-9.6.1-1378637.tar.gz"
+# We do not use 6.0.2 because of a HGFS bug:
+# https://communities.vmware.com/thread/462303
+VMWARE_TOOLS_URL = "https://softwareupdate.vmware.com/cds/vmw-desktop/fusion/6.0.1/1331545/packages/com.vmware.fusion.tools.linux.zip.tar"
+VMWARE_TOOLS_ARCHIVE = "VMwareTools-9.6.0-1294478.tar.gz"
 WEBSERVER = "juvia-helper.phusion.nl"
 WEBROOT = "/srv/oss_binaries_passenger/vagrant/boxes"
+
+require 'tmpdir'
 
 
 #### Boxes ####
@@ -69,6 +73,17 @@ end
 desc "Build VMWare Fusion box file"
 task "vmware_fusion:build_box" do
 	sh "bundle exec veewee fusion export ubuntu-12.04.3-amd64-vmwarefusion --force"
+	Dir.mktmpdir('vmfusion', Dir.pwd) do |tmpdir|
+		puts "Temp dir #{tmpdir} created"
+		sh "cd #{tmpdir} && tar xzf ../ubuntu-12.04.3-amd64-vmwarefusion.box"
+		vmx = Dir["#{tmpdir}/*.vmx"].first
+		puts "Disabling VMWare Tools autoupdate in #{vmx}"
+		contents = File.open(vmx, "r") { |f| f.read }
+		contents.sub!(/^tools\.upgrade\.policy = .*$/, '')
+		contents << "\ntools.upgrade.policy = \"manual\"\n"
+		File.open(vmx, "w") { |f| f.write(contents) }
+		sh "cd #{tmpdir} && env GZIP=--best tar -czf ../ubuntu-12.04.3-amd64-vmwarefusion.box *"
+	end
 end
 
 desc "Import VMWare Fusion box file into Vagrant"
@@ -91,7 +106,7 @@ file "iso/#{VMWARE_TOOLS_ARCHIVE}" do
 	sh "cd iso && curl -L -O -# --fail -S #{VMWARE_TOOLS_URL}"
 	sh "cd iso && " +
 		"tar xf com.vmware.fusion.tools.linux.zip.tar && " +
-		"unzip com.vmware.fusion.tools.linux.zip"
+		"unzip -o com.vmware.fusion.tools.linux.zip"
 	sh "cd iso && rm -f manifest.plist descriptor.xml com.vmware.fusion.tools.linux.zip"
 	sh "cd iso/payload && 7z x linux.iso && mv #{VMWARE_TOOLS_ARCHIVE} ../"
 	sh "rm -rf iso/payload iso/com.vmware.fusion.tools.linux.zip.tar"
