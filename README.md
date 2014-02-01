@@ -1,5 +1,8 @@
 # Docker-friendly Vagrant base boxes
 
+<img src="http://blog.phusion.nl/wp-content/uploads/2013/11/vagrant.png" height="150">
+<img src="http://blog.phusion.nl/wp-content/uploads/2013/11/docker.png" height="150">
+
 This repository contains definitions for various Docker-friendly [Vagrant](http://www.vagrantup.com/) base boxes. These boxes are based on Ubuntu 12.04, and differ from the ones provided in by vagrantup.com in the following ways:
 
  * We provide 2 virtual CPUs by default, so that the boxes can make better use of multicore hosts.
@@ -7,13 +10,20 @@ This repository contains definitions for various Docker-friendly [Vagrant](http:
  * We provide a bigger virtual hard disk: around 40 GB.
  * We use LVM so that partitioning is easier.
  * Our default kernel version is 3.8 (instead of 3.2), so that you can use [Docker](http://www.docker.io/) out-of-the-box.
- * The memory cgroup and swap accounting are turned on, for some Docker features.
+ * [The memory cgroup and swap accounting](http://docs.docker.io/en/latest/installation/kernel/#memory-and-swap-accounting-on-debian-ubuntu) are turned on, for some Docker features.
  * Chef is installed via the Ubuntu packages that they provide, instead of via RubyGems. This way the box doesn't have to come with Ruby by default, making the environment cleaner.
  * Our VMWare Fusion boxes integrate VMWare Tools into DKMS. That way, any kernel upgrades won't break VMWare Tools (and thus Shared Folders): the Tools will be automatically rebuilt on every kernel upgrade.
 
 These base boxes are automatically built from [Veewee](https://github.com/jedi4ever/veewee) definitions. These definitions makes building boxes quick and unambigious. The entire building process is described in the definitions; no manual intervention is required.
 
 We provide prebuilt boxes at https://oss-binaries.phusionpassenger.com/vagrant/boxes/, but you can build them yourself if you so wish.
+
+**Related resources**:
+ [Github](https://github.com/phusion/open-vagrant-boxes) |
+ [Prebuilt boxes](https://oss-binaries.phusionpassenger.com/vagrant/boxes/) |
+ [Discussion forum](https://groups.google.com/forum/#!forum/passenger-docker) |
+ [Twitter](https://twitter.com/phusion_nl) |
+ [Blog](http://blog.phusion.nl)
 
 ## Using these boxes in Vagrant
 
