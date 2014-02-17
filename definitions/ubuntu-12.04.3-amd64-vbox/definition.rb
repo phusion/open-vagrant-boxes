@@ -1,3 +1,17 @@
+postinstall_files = [
+  "base.sh",
+  "vagrant.sh",
+  "chef.sh",
+  "puppet.sh",
+  "memory_swap_accounting.sh",
+  "fixup_kernels.sh",
+  "_cleanup.sh",
+  "_#{env.current_provider}.sh"
+]
+if env.current_provider == "vmfusion"
+  postinstall_files << "../../iso/_latest_vmware_tools.tar.gz"
+end
+
 Veewee::Session.declare({
   :cpu_count => '2',
   :memory_size=> '1024',
@@ -5,8 +19,8 @@ Veewee::Session.declare({
   :disk_format => 'VDI',
   :hostiocache => 'on',
   :os_type_id => 'Ubuntu_64',
-  :iso_file => "ubuntu-12.04.3-server-amd64.iso",
-  :iso_src => "http://mirror.anl.gov/pub/ubuntu-iso/DVDs/ubuntu/12.04.3/release/ubuntu-12.04.3-server-amd64.iso",
+  :iso_file => "ubuntu-12.04.4-server-amd64.iso",
+  :iso_src => "http://releases.ubuntu.com/12.04/ubuntu-12.04.4-server-amd64.iso",
   :iso_md5 => 'a8c667e871f48f3a662f3fbf1c3ddb17',
   :iso_download_timeout => "1000",
   :boot_wait => "10",
@@ -30,17 +44,7 @@ Veewee::Session.declare({
   :ssh_guest_port => "22",
   :sudo_cmd => "echo '%p'|sudo -S bash '%f'",
   :shutdown_cmd => "shutdown -P now",
-  :postinstall_files => [
-    "base.sh",
-    "vagrant.sh",
-    "../../iso/_latest_vmware_tools.tar.gz",
-    "#{env.current_provider}.sh",
-    "chef.sh",
-    "puppet.sh",
-    "memory_swap_accounting.sh",
-    "_cleanup.sh",
-    "#{env.current_provider}_cleanup.sh"
-  ],
+  :postinstall_files => postinstall_files,
   :postinstall_timeout => "10000",
   :vmfusion => {
     :vm_options => {

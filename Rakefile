@@ -11,7 +11,8 @@ require 'tmpdir'
 #### Boxes ####
 
 desc "Build VirtualBox box file & import it into Vagrant"
-task "virtualbox:all" => ["virtualbox:build_image", "virtualbox:build_box", "virtualbox:import_box"]
+task "virtualbox:all" => ["virtualbox:build_image", "virtualbox:fixup_image",
+	"virtualbox:build_box", "virtualbox:import_box"]
 
 desc "Build VirtualBox image"
 task "virtualbox:build_image" do
@@ -19,6 +20,23 @@ task "virtualbox:build_image" do
 	sh "bundle exec veewee vbox ssh ubuntu-12.04.3-amd64-vbox 'sudo poweroff'"
 	puts "Sleeping a few seconds, waiting for the VM to power off."
 	sh "sleep 30"
+end
+
+desc "Fix up VirtualBox Guest Additions inside the VM"
+task "virtualbox:fixup_image" do
+	# After building the box, the kernel has been upgraded. We boot into
+	# the new kernel to install VirtualBox Guest Additions.
+	sh "bundle exec veewee vbox up ubuntu-12.04.3-amd64-vbox"
+	sh "sleep 10"
+	sh "chmod 600 vagrant_insecure.key"
+	command = "cd /home/vagrant && " +
+		"bash /home/vagrant/_virtualbox.sh && " +
+		"bash /home/vagrant/_cleanup.sh virtualbox && " +
+		"poweroff"
+	command = "sudo bash -c #{Shellwords.escape command}"
+	sh "bundle exec veewee vbox ssh ubuntu-12.04.3-amd64-vbox #{Shellwords.escape command}"
+	puts "Sleeping a few seconds, waiting for the VM to power off."
+	sh "sleep 10"
 end
 
 desc "Build VirtualBox box file"
@@ -67,7 +85,14 @@ task "vmware_fusion:fixup_image" do
 	sh "bundle exec veewee fusion up ubuntu-12.04.3-amd64-vmwarefusion"
 	sh "sleep 10"
 	sh "chmod 600 vagrant_insecure.key"
-	sh "bundle exec veewee fusion ssh ubuntu-12.04.3-amd64-vmwarefusion 'sudo bash /home/vagrant/_cleanup.sh vmfusion'"
+	command = "cd /home/vagrant && " +
+		"bash /home/vagrant/_vmfusion.sh && " +
+		"bash /home/vagrant/_cleanup.sh vmfusion && " +
+		"poweroff"
+	command = "sudo bash -c #{Shellwords.escape command}"
+	sh "bundle exec veewee fusion ssh ubuntu-12.04.3-amd64-vmwarefusion #{Shellwords.escape command}"
+	puts "Sleeping a few seconds, waiting for the VM to power off."
+	sh "sleep 10"
 end
 
 desc "Build VMWare Fusion box file"

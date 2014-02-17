@@ -3,7 +3,7 @@
 # This is the current stable release to default to, with Omnibus patch level (e.g. 10.12.0-1)
 # Note that the chef template downloads 'x.y.z' not 'x.y.z-r' which should be a duplicate of the latest -r
 use_shell=0
-version=11.8.0
+version=11.10.0
 
 prerelease="false"
 
