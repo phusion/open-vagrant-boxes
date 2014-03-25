@@ -18,16 +18,23 @@ These base boxes are automatically built from [Veewee](https://github.com/jedi4e
 
 We provide prebuilt boxes at https://oss-binaries.phusionpassenger.com/vagrant/boxes/, but you can build them yourself if you so wish.
 
+The boxes are also available on [Vagrant Cloud](https://vagrantcloud.com/phusion/ubuntu-12.04-amd64).
+
 **Related resources**:
  [Github](https://github.com/phusion/open-vagrant-boxes) |
  [Prebuilt boxes](https://oss-binaries.phusionpassenger.com/vagrant/boxes/) |
+ [Vagrant Cloud](https://vagrantcloud.com/phusion/ubuntu-12.04-amd64) |
  [Discussion forum](https://groups.google.com/forum/#!forum/passenger-docker) |
  [Twitter](https://twitter.com/phusion_nl) |
  [Blog](http://blog.phusion.nl)
 
 ## Using these boxes in Vagrant
 
-Here is an example Vagrantfile which works with both VirtualBox and VMWare Fusion. It also automatically installs the latest version of Docker.
+If you have Vagrant 1.5, you can use our boxes through [Vagrant Cloud](https://vagrantcloud.com/phusion/ubuntu-12.04-amd64):
+
+    vagrant init phusion/ubuntu-12.04-amd64
+
+On older Vagrant versions, you can modify your Vagrantfile to use our boxes. Here is an example Vagrantfile which works with both VirtualBox and VMWare Fusion. It also automatically installs the latest version of Docker.
 
     # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
     VAGRANTFILE_API_VERSION = "2"
