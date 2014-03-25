@@ -2,8 +2,9 @@
 # https://communities.vmware.com/thread/462303
 VMWARE_TOOLS_URL = "https://softwareupdate.vmware.com/cds/vmw-desktop/fusion/6.0.1/1331545/packages/com.vmware.fusion.tools.linux.zip.tar"
 VMWARE_TOOLS_ARCHIVE = "VMwareTools-9.6.0-1294478.tar.gz"
+VERSION = "2014-02-01"
 WEBSERVER = "juvia-helper.phusion.nl"
-WEBROOT = "/srv/oss_binaries_passenger/vagrant/boxes"
+WEBROOT = "/srv/oss_binaries_passenger/vagrant/boxes/#{VERSION}"
 
 require 'tmpdir'
 
@@ -143,7 +144,7 @@ end
 def create_release_task(name, box_file)
 	desc "Release #{name} box file to a public server"
 	task "release:#{name}" => box_file do
-		sh "ssh", WEBSERVER, "rm -rf #{WEBROOT}/tmp && mkdir #{WEBROOT}/tmp"
+		sh "ssh", WEBSERVER, "mkdir -p #{WEBROOT} && rm -rf #{WEBROOT}/tmp && mkdir #{WEBROOT}/tmp"
 		sh "scp #{box_file} #{WEBSERVER}:#{WEBROOT}/tmp/"
 		sh "md5sum #{box_file} | ssh #{WEBSERVER} tee #{WEBROOT}/tmp/#{box_file}.md5.txt"
 		sh "ssh", WEBSERVER, "mv #{WEBROOT}/tmp/* #{WEBROOT}/ && rm -rf #{WEBROOT}/tmp"
