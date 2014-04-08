@@ -10,7 +10,7 @@ This repository contains definitions for various Docker-friendly [Vagrant](http:
  * We provide a bigger virtual hard disk: around 40 GB.
  * We use LVM so that partitioning is easier.
  * Our default kernel version is 3.8 (instead of 3.2), so that you can use [Docker](http://www.docker.io/) out-of-the-box.
- * [The memory cgroup and swap accounting](http://docs.docker.io/en/latest/installation/kernel/#memory-and-swap-accounting-on-debian-ubuntu) are turned on, for some Docker features.
+ * [The memory cgroup and swap accounting](http://docs.docker.io/en/latest/installation/ubuntulinux/#memory-and-swap-accounting) are turned on, for some Docker features.
  * Chef is installed via the Ubuntu packages that they provide, instead of via RubyGems. This way the box doesn't have to come with Ruby by default, making the environment cleaner.
  * Our VMWare Fusion boxes integrate VMWare Tools into DKMS. That way, any kernel upgrades won't break VMWare Tools (and thus Shared Folders): the Tools will be automatically rebuilt on every kernel upgrade.
 
