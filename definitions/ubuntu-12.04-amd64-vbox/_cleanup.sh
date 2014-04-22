@@ -1,7 +1,6 @@
 # Remove items used for building, since they aren't needed anymore.
-# On VirtualBox, this is run after all postinstall scripts have run.
-# On VMWare Fusion, this is run after all postinstall scripts have run,
-# and the box has been rebooted into the kernel.
+# This is run after all postinstall scripts have run, and the box
+# has been rebooted into the new kernel.
 set -ex
 
 if [[ "$1" = vmfusion ]]; then
