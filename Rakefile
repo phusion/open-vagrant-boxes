@@ -6,7 +6,7 @@ VERSION = "2014-04-22"
 WEBSERVER = "juvia-helper.phusion.nl"
 WEBROOT = "/srv/oss_binaries_passenger/vagrant/boxes/#{VERSION}"
 
-DISTRO_RELEASES = ["ubuntu-12.04-amd64"]
+DISTRO_RELEASES = ["ubuntu-12.04-amd64", "ubuntu-14.04-amd64"]
 
 require 'tmpdir'
 

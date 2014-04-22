@@ -1,3 +1,8 @@
+## 2014-04-22
+
+ * Upgraded VMWare Tools to 9.6.2-1688356 (from VMWare Fusion 6.0.3). This fixes the file corruption bug mentioned in the 2014-02-01 release notes, and also fixes compatibility with kernel 3.13.
+ * There are now base boxes available based on Ubuntu 14.04. See the README for details.
+
 ## 2014-02-01
 
  * Downgraded VMWare Tools to 9.6.0-1294478 because of [a file corruption bug in HGFS](https://communities.vmware.com/thread/462303).

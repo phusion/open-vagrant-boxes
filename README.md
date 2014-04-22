@@ -3,13 +3,13 @@
 <img src="http://blog.phusion.nl/wp-content/uploads/2013/11/vagrant.png" height="150">
 <img src="http://blog.phusion.nl/wp-content/uploads/2013/11/docker.png" height="150">
 
-This repository contains definitions for various Docker-friendly [Vagrant](http://www.vagrantup.com/) base boxes. These boxes are based on Ubuntu 12.04, and differ from the ones provided in by vagrantup.com in the following ways:
+This repository contains definitions for various Docker-friendly [Vagrant](http://www.vagrantup.com/) base boxes. There are boxes that are based on Ubuntu 12.04, and boxes that are based on Ubuntu 14.04. They differ from the ones provided by vagrantup.com in the following ways:
 
  * We provide 2 virtual CPUs by default, so that the boxes can make better use of multicore hosts.
  * We provide more RAM by default: 1 GB.
  * We provide a bigger virtual hard disk: around 40 GB.
  * We use LVM so that partitioning is easier.
- * Our default kernel version is 3.8 (instead of 3.2), so that you can use [Docker](http://www.docker.io/) out-of-the-box.
+ * On the Ubuntu 12.04 version, our default kernel version is 3.8 (instead of 3.2), so that you can use [Docker](http://www.docker.io/) out-of-the-box.
  * [The memory cgroup and swap accounting](http://docs.docker.io/en/latest/installation/ubuntulinux/#memory-and-swap-accounting) are turned on, for some Docker features.
  * Chef is installed via the Ubuntu packages that they provide, instead of via RubyGems. This way the box doesn't have to come with Ruby by default, making the environment cleaner.
  * Our VMWare Fusion boxes integrate VMWare Tools into DKMS. That way, any kernel upgrades won't break VMWare Tools (and thus Shared Folders): the Tools will be automatically rebuilt on every kernel upgrade.
@@ -30,8 +30,10 @@ The boxes are also available on [Vagrant Cloud](https://vagrantcloud.com/phusion
 
 ## Using these boxes in Vagrant
 
-If you have Vagrant 1.5, you can use our boxes through [Vagrant Cloud](https://vagrantcloud.com/phusion/ubuntu-12.04-amd64):
+If you have Vagrant 1.5, you can use our boxes through [Vagrant Cloud](https://vagrantcloud.com/phusion):
 
+    vagrant init phusion/ubuntu-14.04-amd64
+    # -OR-
     vagrant init phusion/ubuntu-12.04-amd64
 
 On older Vagrant versions, you can modify your Vagrantfile to use our boxes. Here is an example Vagrantfile which works with both VirtualBox and VMWare Fusion. It also automatically installs the latest version of Docker.
@@ -40,11 +42,15 @@ On older Vagrant versions, you can modify your Vagrantfile to use our boxes. Her
     VAGRANTFILE_API_VERSION = "2"
 
     Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-      config.vm.box = "phusion-open-ubuntu-12.04-amd64"
-      config.vm.box_url = "https://oss-binaries.phusionpassenger.com/vagrant/boxes/ubuntu-12.04.3-amd64-vbox.box"
+      config.vm.box = "phusion-open-ubuntu-14.04-amd64"
+      config.vm.box_url = "https://oss-binaries.phusionpassenger.com/vagrant/boxes/ubuntu-14.04-amd64-vbox.box"
+      # Or, for Ubuntu 12.04:
+      #config.vm.box = "phusion-open-ubuntu-12.04-amd64"
+      #config.vm.box_url = "https://oss-binaries.phusionpassenger.com/vagrant/boxes/ubuntu-12.04.3-amd64-vbox.box"
 
       config.vm.provider :vmware_fusion do |f, override|
-        override.vm.box_url = "https://oss-binaries.phusionpassenger.com/vagrant/boxes/ubuntu-12.04.3-amd64-vmwarefusion.box"
+        override.vm.box_url = "https://oss-binaries.phusionpassenger.com/vagrant/boxes/ubuntu-14.04-amd64-vmwarefusion.box"
+        #override.vm.box_url = "https://oss-binaries.phusionpassenger.com/vagrant/boxes/ubuntu-12.04.3-amd64-vmwarefusion.box"
       end
 
       if Dir.glob("#{File.dirname(__FILE__)}/.vagrant/machines/default/*/id").empty?
@@ -90,7 +96,9 @@ These Vagrant boxes are provided to you by [Phusion](http://www.phusion.nl/). Yo
 VirtualBox:
 
     bundle exec rake virtualbox:ubuntu-12.04-amd64:all
+    bundle exec rake virtualbox:ubuntu-14.04-amd64:all
 
 VMWare Fusion:
 
     bundle exec rake vmware_fusion:ubuntu-12.04-amd64:all
+    bundle exec rake vmware_fusion:ubuntu-14.04-amd64:all
