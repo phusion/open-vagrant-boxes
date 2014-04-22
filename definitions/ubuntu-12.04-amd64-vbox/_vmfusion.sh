@@ -2,6 +2,11 @@ set -ex
 
 cd /tmp
 
+set +e
+/etc/init.d/virtualbox-ose-guest-utils stop
+/etc/init.d/virtualbox-ose-guest-x11 stop
+rmmod vboxguest
+set -e
 apt-get -y purge virtualbox-ose-guest-x11 virtualbox-ose-guest-dkms virtualbox-ose-guest-utils
 
 export VMTOOLS_ARCHIVE=/home/vagrant/_latest_vmware_tools.tar.gz
