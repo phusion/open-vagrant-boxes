@@ -6,115 +6,127 @@ VERSION = "2014-04-22"
 WEBSERVER = "juvia-helper.phusion.nl"
 WEBROOT = "/srv/oss_binaries_passenger/vagrant/boxes/#{VERSION}"
 
+DISTRO_RELEASES = ["ubuntu-12.04-amd64"]
+
 require 'tmpdir'
 
 
 #### Boxes ####
 
-desc "Build VirtualBox box file & import it into Vagrant"
-task "virtualbox:all" => ["virtualbox:build_image", "virtualbox:fixup_image",
-	"virtualbox:build_box", "virtualbox:import_box"]
+DISTRO_RELEASES.each do |distro_release|
+	desc "Build VirtualBox box file & import it into Vagrant"
+	task "virtualbox:#{distro_release}:all" => [
+		"virtualbox:#{distro_release}:build_image",
+		"virtualbox:#{distro_release}:fixup_image",
+		"virtualbox:#{distro_release}:build_box",
+		"virtualbox:#{distro_release}:import_box"
+	]
 
-desc "Build VirtualBox image"
-task "virtualbox:build_image" do
-	sh "bundle exec veewee vbox build ubuntu-12.04.3-amd64-vbox --force --auto"
-	sh "bundle exec veewee vbox ssh ubuntu-12.04.3-amd64-vbox 'sudo poweroff'"
-	puts "Sleeping a few seconds, waiting for the VM to power off."
-	sh "sleep 30"
-end
-
-desc "Fix up VirtualBox Guest Additions inside the VM"
-task "virtualbox:fixup_image" do
-	# After building the box, the kernel has been upgraded. We boot into
-	# the new kernel to install VirtualBox Guest Additions.
-	sh "bundle exec veewee vbox up ubuntu-12.04.3-amd64-vbox"
-	sh "sleep 10"
-	sh "chmod 600 vagrant_insecure.key"
-	command = "cd /home/vagrant && " +
-		"bash /home/vagrant/_virtualbox.sh && " +
-		"bash /home/vagrant/_cleanup.sh virtualbox && " +
-		"poweroff"
-	command = "sudo bash -c #{Shellwords.escape command}"
-	sh "bundle exec veewee vbox ssh ubuntu-12.04.3-amd64-vbox #{Shellwords.escape command}"
-	puts "Sleeping a few seconds, waiting for the VM to power off."
-	sh "sleep 10"
-end
-
-desc "Build VirtualBox box file"
-task "virtualbox:build_box" do
-	require 'nokogiri'
-	sh "bundle exec veewee vbox export ubuntu-12.04.3-amd64-vbox --force"
-	sh "rm -rf tmp && mkdir tmp && cd tmp && tar xf ../ubuntu-12.04.3-amd64-vbox.box"
-	doc = Nokogiri.XML(File.open("tmp/box.ovf", "r"))
-	# Remove DVD device which could cause problems for older VirtualBoxes:
-	# https://github.com/phusion/open-vagrant-boxes/issues/1
-	(doc / "StorageControllers > StorageController[name='IDE Controller'] > AttachedDevice[port='1']").remove
-	# Remove all Shared Folders created by Veewee, since they reference
-	# directories that will not exist on machines other than the builder's.
-	# This removes some warnings.
-	(doc / "SharedFolder").remove
-	File.open("tmp/box.ovf", "w") do |f|
-		doc.write_xml_to(f)
+	desc "Build VirtualBox image"
+	task "virtualbox:#{distro_release}:build_image" do
+		sh "bundle exec veewee vbox build #{distro_release}-vbox --force --auto"
+		sh "bundle exec veewee vbox ssh #{distro_release}-vbox 'sudo poweroff'"
+		puts "Sleeping a few seconds, waiting for the VM to power off."
+		sh "sleep 30"
 	end
-	sh "cd tmp && tar -cf ../ubuntu-12.04.3-amd64-vbox.box *"
-	sh "rm -rf tmp"
-end
 
-desc "Import VirtualBox box file into Vagrant"
-task "virtualbox:import_box" do
-	sh "vagrant box add phusion-open-ubuntu-12.04-amd64 ubuntu-12.04.3-amd64-vbox.box --force"
-end
-
-
-desc "Build VMWare Fusion box file & import it into Vagrant"
-task "vmware_fusion:all" => ["vmware_fusion:build_image", "vmware_fusion:fixup_image",
-	"vmware_fusion:build_box", "vmware_fusion:import_box"]
-
-desc "Build VMWare Fusion image"
-task "vmware_fusion:build_image" => "iso/_latest_vmware_tools.tar.gz" do
-	sh "bundle exec veewee fusion build ubuntu-12.04.3-amd64-vmwarefusion --force --auto"
-	sh "bundle exec veewee fusion ssh ubuntu-12.04.3-amd64-vmwarefusion 'sudo poweroff'"
-	puts "Sleeping a few seconds, waiting for the VM to power off."
-	sh "sleep 30"
-end
-
-desc "Fix up VMWare Tools inside the VM"
-task "vmware_fusion:fixup_image" do
-	# After building the box, the kernel has been upgraded. We have to boot it
-	# in the new kernel at least once so that the VMWare Tools are properly compiled
-	# for the new kernel.
-	sh "bundle exec veewee fusion up ubuntu-12.04.3-amd64-vmwarefusion"
-	sh "sleep 10"
-	sh "chmod 600 vagrant_insecure.key"
-	command = "cd /home/vagrant && " +
-		"bash /home/vagrant/_vmfusion.sh && " +
-		"bash /home/vagrant/_cleanup.sh vmfusion && " +
-		"poweroff"
-	command = "sudo bash -c #{Shellwords.escape command}"
-	sh "bundle exec veewee fusion ssh ubuntu-12.04.3-amd64-vmwarefusion #{Shellwords.escape command}"
-	puts "Sleeping a few seconds, waiting for the VM to power off."
-	sh "sleep 10"
-end
-
-desc "Build VMWare Fusion box file"
-task "vmware_fusion:build_box" do
-	sh "bundle exec veewee fusion export ubuntu-12.04.3-amd64-vmwarefusion --force"
-	Dir.mktmpdir('vmfusion', Dir.pwd) do |tmpdir|
-		puts "Temp dir #{tmpdir} created"
-		sh "cd #{tmpdir} && tar xzf ../ubuntu-12.04.3-amd64-vmwarefusion.box"
-		vmx = Dir["#{tmpdir}/*.vmx"].first
-		puts "Disabling VMWare Tools autoupdate in #{vmx}"
-		contents = File.open(vmx, "r") { |f| f.read }
-		contents.sub!(/^tools\.upgrade\.policy = .*$/, '')
-		contents << "\ntools.upgrade.policy = \"manual\"\n"
-		File.open(vmx, "w") { |f| f.write(contents) }
-		sh "cd #{tmpdir} && env GZIP=--best tar -czf ../ubuntu-12.04.3-amd64-vmwarefusion.box *"
+	desc "Fix up VirtualBox Guest Additions inside the VM"
+	task "virtualbox:#{distro_release}:fixup_image" do
+		# After building the box, the kernel has been upgraded. We boot into
+		# the new kernel to install VirtualBox Guest Additions.
+		sh "bundle exec veewee vbox up #{distro_release}-vbox"
+		sh "sleep 10"
+		sh "chmod 600 vagrant_insecure.key"
+		command = "cd /home/vagrant && " +
+			"bash /home/vagrant/_virtualbox.sh && " +
+			"bash /home/vagrant/_cleanup.sh virtualbox && " +
+			"poweroff"
+		command = "sudo bash -c #{Shellwords.escape command}"
+		sh "bundle exec veewee vbox ssh #{distro_release}-vbox #{Shellwords.escape command}"
+		puts "Sleeping a few seconds, waiting for the VM to power off."
+		sh "sleep 10"
 	end
-end
 
-desc "Import VMWare Fusion box file into Vagrant"
-task "vmware_fusion:import_box" do
-	sh "vagrant box add phusion-open-ubuntu-12.04-amd64 ubuntu-12.04.3-amd64-vmwarefusion.box --force"
+	desc "Build VirtualBox box file"
+	task "virtualbox:#{distro_release}:build_box" do
+		require 'nokogiri'
+		sh "bundle exec veewee vbox export #{distro_release}-vbox --force"
+		sh "rm -rf tmp && mkdir tmp && cd tmp && tar xf ../#{distro_release}-vbox.box"
+		doc = Nokogiri.XML(File.open("tmp/box.ovf", "r"))
+		# Remove DVD device which could cause problems for older VirtualBoxes:
+		# https://github.com/phusion/open-vagrant-boxes/issues/1
+		(doc / "StorageControllers > StorageController[name='IDE Controller'] > AttachedDevice[port='1']").remove
+		# Remove all Shared Folders created by Veewee, since they reference
+		# directories that will not exist on machines other than the builder's.
+		# This removes some warnings.
+		(doc / "SharedFolder").remove
+		File.open("tmp/box.ovf", "w") do |f|
+			doc.write_xml_to(f)
+		end
+		sh "cd tmp && tar -cf ../#{distro_release}-vbox.box *"
+		sh "rm -rf tmp"
+	end
+
+	desc "Import VirtualBox box file into Vagrant"
+	task "virtualbox:#{distro_release}:import_box" do
+		sh "vagrant box add phusion-open-#{distro_release} #{distro_release}-vbox.box --force"
+	end
+
+
+	desc "Build VMWare Fusion box file & import it into Vagrant"
+	task "vmware_fusion:#{distro_release}:all" => [
+		"vmware_fusion:#{distro_release}:build_image",
+		"vmware_fusion:#{distro_release}:fixup_image",
+		"vmware_fusion:#{distro_release}:build_box",
+		"vmware_fusion:#{distro_release}:import_box"
+	]
+
+	desc "Build VMWare Fusion image"
+	task "vmware_fusion:#{distro_release}:build_image" => "iso/_latest_vmware_tools.tar.gz" do
+		sh "bundle exec veewee fusion build #{distro_release}-vmwarefusion --force --auto"
+		sh "bundle exec veewee fusion ssh #{distro_release}-vmwarefusion 'sudo poweroff'"
+		puts "Sleeping a few seconds, waiting for the VM to power off."
+		sh "sleep 30"
+	end
+
+	desc "Fix up VMWare Tools inside the VM"
+	task "vmware_fusion:#{distro_release}:fixup_image" do
+		# After building the box, the kernel has been upgraded. We have to boot it
+		# in the new kernel at least once so that the VMWare Tools are properly compiled
+		# for the new kernel.
+		sh "bundle exec veewee fusion up #{distro_release}-vmwarefusion"
+		sh "sleep 10"
+		sh "chmod 600 vagrant_insecure.key"
+		command = "cd /home/vagrant && " +
+			"bash /home/vagrant/_vmfusion.sh && " +
+			"bash /home/vagrant/_cleanup.sh vmfusion && " +
+			"poweroff"
+		command = "sudo bash -c #{Shellwords.escape command}"
+		sh "bundle exec veewee fusion ssh #{distro_release}-vmwarefusion #{Shellwords.escape command}"
+		puts "Sleeping a few seconds, waiting for the VM to power off."
+		sh "sleep 10"
+	end
+
+	desc "Build VMWare Fusion box file"
+	task "vmware_fusion:#{distro_release}:build_box" do
+		sh "bundle exec veewee fusion export #{distro_release}-vmwarefusion --force"
+		Dir.mktmpdir('vmfusion', Dir.pwd) do |tmpdir|
+			puts "Temp dir #{tmpdir} created"
+			sh "cd #{tmpdir} && tar xzf ../#{distro_release}-vmwarefusion.box"
+			vmx = Dir["#{tmpdir}/*.vmx"].first
+			puts "Disabling VMWare Tools autoupdate in #{vmx}"
+			contents = File.open(vmx, "r") { |f| f.read }
+			contents.sub!(/^tools\.upgrade\.policy = .*$/, '')
+			contents << "\ntools.upgrade.policy = \"manual\"\n"
+			File.open(vmx, "w") { |f| f.write(contents) }
+			sh "cd #{tmpdir} && env GZIP=--best tar -czf ../#{distro_release}-vmwarefusion.box *"
+		end
+	end
+
+	desc "Import VMWare Fusion box file into Vagrant"
+	task "vmware_fusion:#{distro_release}:import_box" do
+		sh "vagrant box add phusion-open-#{distro_release} #{distro_release}-vmwarefusion.box --force"
+	end
 end
 
 
@@ -141,18 +153,23 @@ end
 
 #### Release #####
 
-def create_release_task(name, box_file)
-	desc "Release #{name} box file to a public server"
-	task "release:#{name}" => box_file do
-		sh "ssh", WEBSERVER, "mkdir -p #{WEBROOT} && rm -rf #{WEBROOT}/tmp && mkdir #{WEBROOT}/tmp"
-		sh "scp #{box_file} #{WEBSERVER}:#{WEBROOT}/tmp/"
-		sh "md5sum #{box_file} | ssh #{WEBSERVER} tee #{WEBROOT}/tmp/#{box_file}.md5.txt"
-		sh "ssh", WEBSERVER, "mv #{WEBROOT}/tmp/* #{WEBROOT}/ && rm -rf #{WEBROOT}/tmp"
+DISTRO_RELEASES.each do |distro_release|
+	def create_release_task(name, distro_release, box_file)
+		desc "Release #{distro_release} #{name} box file to a public server"
+		task "release:#{distro_release}:#{name}" => box_file do
+			sh "ssh", WEBSERVER, "mkdir -p #{WEBROOT} && rm -rf #{WEBROOT}/tmp && mkdir #{WEBROOT}/tmp"
+			sh "scp #{box_file} #{WEBSERVER}:#{WEBROOT}/tmp/"
+			sh "md5sum #{box_file} | ssh #{WEBSERVER} tee #{WEBROOT}/tmp/#{box_file}.md5.txt"
+			sh "ssh", WEBSERVER, "mv #{WEBROOT}/tmp/* #{WEBROOT}/ && rm -rf #{WEBROOT}/tmp"
+		end
 	end
+
+	desc "Release all box files to a public server"
+	task "release" => [
+		"release:#{distro_release}:virtualbox",
+		"release:#{distro_release}:vmware_fusion"
+	]
+
+	create_release_task("virtualbox", distro_release, "#{distro_release}-vbox.box")
+	create_release_task("vmware_fusion", distro_release, "#{distro_release}-vmwarefusion.box")
 end
-
-desc "Release all box files to a public server"
-task "release" => ["release:virtualbox", "release:vmware_fusion"]
-
-create_release_task("virtualbox", "ubuntu-12.04.3-amd64-vbox.box")
-create_release_task("vmware_fusion", "ubuntu-12.04.3-amd64-vmwarefusion.box")
