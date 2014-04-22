@@ -22,9 +22,5 @@ yes|sh /mnt/VBoxLinuxAdditions.run -- install /VBoxLinuxAdditions
 set -e
 umount /mnt
 
-# Now that the VirtualBox guest additions are installed, we can upgrade the kernel
-apt-get -y dist-upgrade
-apt-get -y install linux-generic-lts-raring linux-headers-generic-lts-raring
-
 #Cleanup VirtualBox
 rm $VBOX_ISO

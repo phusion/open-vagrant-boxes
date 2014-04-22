@@ -239,9 +239,3 @@ fi
 echo "Done"
 
 ###################
-
-set -x
-
-# Now that VMWare Tools are installed, we can upgrade the kernel
-apt-get -y dist-upgrade
-apt-get -y install linux-generic-lts-raring linux-headers-generic-lts-raring
