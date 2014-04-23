@@ -18,12 +18,12 @@ These base boxes are automatically built from [Veewee](https://github.com/jedi4e
 
 We provide prebuilt boxes at https://oss-binaries.phusionpassenger.com/vagrant/boxes/, but you can build them yourself if you so wish.
 
-The boxes are also available on [Vagrant Cloud](https://vagrantcloud.com/phusion/ubuntu-12.04-amd64).
+The boxes are also available on [Vagrant Cloud](https://vagrantcloud.com/phusion).
 
 **Related resources**:
  [Github](https://github.com/phusion/open-vagrant-boxes) |
  [Prebuilt boxes](https://oss-binaries.phusionpassenger.com/vagrant/boxes/) |
- [Vagrant Cloud](https://vagrantcloud.com/phusion/ubuntu-12.04-amd64) |
+ [Vagrant Cloud](https://vagrantcloud.com/phusion) |
  [Discussion forum](https://groups.google.com/forum/#!forum/passenger-docker) |
  [Twitter](https://twitter.com/phusion_nl) |
  [Blog](http://blog.phusion.nl)
