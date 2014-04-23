@@ -95,10 +95,10 @@ These Vagrant boxes are provided to you by [Phusion](http://www.phusion.nl/). Yo
 
 VirtualBox:
 
-    bundle exec rake virtualbox:ubuntu-12.04-amd64:all
     bundle exec rake virtualbox:ubuntu-14.04-amd64:all
+    bundle exec rake virtualbox:ubuntu-12.04-amd64:all
 
 VMWare Fusion:
 
-    bundle exec rake vmware_fusion:ubuntu-12.04-amd64:all
     bundle exec rake vmware_fusion:ubuntu-14.04-amd64:all
+    bundle exec rake vmware_fusion:ubuntu-12.04-amd64:all
