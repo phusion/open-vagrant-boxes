@@ -3,7 +3,7 @@
 <img src="http://blog.phusion.nl/wp-content/uploads/2013/11/vagrant.png" height="150">
 <img src="http://blog.phusion.nl/wp-content/uploads/2013/11/docker.png" height="150">
 
-This repository contains definitions for various Docker-friendly [Vagrant](http://www.vagrantup.com/) base boxes. There are boxes that are based on Ubuntu 12.04, and boxes that are based on Ubuntu 14.04. They differ from the ones provided by vagrantup.com in the following ways:
+This repository contains definitions for various Docker-friendly [Vagrant](http://www.vagrantup.com/) base boxes. There are boxes that are based on Ubuntu 12.04 64-bit, and boxes that are based on Ubuntu 14.04 64-bit. They differ from the ones provided by vagrantup.com in the following ways:
 
  * We provide 2 virtual CPUs by default, so that the boxes can make better use of multicore hosts.
  * We provide more RAM by default: 1 GB.
@@ -12,7 +12,7 @@ This repository contains definitions for various Docker-friendly [Vagrant](http:
  * On the Ubuntu 12.04 version, our default kernel version is 3.8 (instead of 3.2), so that you can use [Docker](http://www.docker.io/) out-of-the-box.
  * [The memory cgroup and swap accounting](http://docs.docker.io/en/latest/installation/ubuntulinux/#memory-and-swap-accounting) are turned on, for some Docker features.
  * Chef is installed via the Ubuntu packages that they provide, instead of via RubyGems. This way the box doesn't have to come with Ruby by default, making the environment cleaner.
- * Our VMWare Fusion boxes integrate VMWare Tools into DKMS. That way, any kernel upgrades won't break VMWare Tools (and thus Shared Folders): the Tools will be automatically rebuilt on every kernel upgrade.
+ * Our VMWare Fusion boxes recompile VMWare Tools on every kernel upgrade, so that Shared Folders keep working even if you change the kernel.
 
 These base boxes are automatically built from [Veewee](https://github.com/jedi4ever/veewee) definitions. These definitions makes building boxes quick and unambigious. The entire building process is described in the definitions; no manual intervention is required.
 

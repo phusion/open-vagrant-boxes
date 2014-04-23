@@ -1,7 +1,13 @@
 ## 2014-04-22
 
- * Upgraded VMWare Tools to 9.6.2-1688356 (from VMWare Fusion 6.0.3). This fixes the file corruption bug mentioned in the 2014-02-01 release notes, and also fixes compatibility with kernel 3.13.
  * There are now base boxes available based on Ubuntu 14.04. See the README for details.
+ * Upgraded VMWare Tools to 9.6.2-1688356 (from VMWare Fusion 6.0.3). This is a major improvement over the VMWare Tools included in the last release (9.6.0-1294478, from VMWare Fusion 6.0.1):
+
+    * Fixes the [file corruption bug](https://communities.vmware.com/thread/462303) in VMWare Tools 9.6.1-1378637 (from VMWare Fusion 6.0.2).
+    * Fixes compatibility with kernel 3.13.
+    * Fixes a number of bugs that could cause the kernel to crash.
+
+   If you experienced any crashing/freezing problems with our VMWare Fusion boxes before, then this upgrade will probably help.
 
 ## 2014-02-01
 
