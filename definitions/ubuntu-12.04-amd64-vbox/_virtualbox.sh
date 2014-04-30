@@ -6,6 +6,7 @@ apt-get -y install --no-install-recommends libdbus-1-3
 # The netboot installs the VirtualBox support (old) so we have to remove it
 set +e
 /etc/init.d/virtualbox-ose-guest-utils stop
+/etc/init.d/virtualbox-ose-guest-x11 stop
 rmmod vboxguest
 set -e
 apt-get -y purge virtualbox-ose-guest-x11 virtualbox-ose-guest-dkms virtualbox-ose-guest-utils
