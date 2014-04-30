@@ -239,3 +239,9 @@ fi
 echo "Done"
 
 ###################
+
+set -x
+
+# Load the hgfs module immediately at boot. This makes 'vagrant up' faster at
+# the at "Waiting for HGFS kernel module to load" stage.
+echo vmhgfs >> /etc/modules
