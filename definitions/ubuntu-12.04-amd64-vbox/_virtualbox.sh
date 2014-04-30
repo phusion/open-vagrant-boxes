@@ -23,5 +23,9 @@ yes|sh /mnt/VBoxLinuxAdditions.run -- install /VBoxLinuxAdditions
 set -e
 umount /mnt
 
-#Cleanup VirtualBox
+# Check whether the guest additions are installed correctly
+/etc/init.d/vboxadd start
+lsmod | grep -q vboxguest
+
+# Cleanup VirtualBox
 rm $VBOX_ISO
