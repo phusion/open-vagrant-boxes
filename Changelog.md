@@ -1,3 +1,8 @@
+## 2014-04-30
+
+ * The Ubuntu 12.04 VirtualBox box in release 2014-02-22 was broken: the VirtualBox guest additions weren't correctly installed because the kernel was incorrectly installed. This has now been fixed.
+ * The Ubuntu 12.04 VMWare Fusion box now loads the VMWare Tools kernel modules during startup, so that Vagrant doesn't have to wait so long at the "Waiting for HGFS kernel module" phase.
+
 ## 2014-04-22
 
  * There are now base boxes available based on Ubuntu 14.04. See the README for details.
