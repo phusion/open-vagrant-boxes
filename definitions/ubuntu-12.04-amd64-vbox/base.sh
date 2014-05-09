@@ -5,7 +5,6 @@ set -ex
 apt-get -y update
 apt-get -y upgrade
 apt-get -y install build-essential vim curl
-apt-get clean
 
 # Set up sudo
 ( cat <<'EOP'
