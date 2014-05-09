@@ -23,6 +23,12 @@ yes|sh /mnt/VBoxLinuxAdditions.run -- install /VBoxLinuxAdditions
 set -e
 umount /mnt
 
+# Fix guest additions installation problem on kernel 3.13.
+# https://www.virtualbox.org/ticket/12879#comment:2
+if [[ ! -e /usr/lib/VBoxGuestAdditions ]]; then
+	ln -s /VBoxLinuxAdditions/lib/VBoxGuestAdditions /usr/lib/VBoxGuestAdditions
+fi
+
 # Check whether the guest additions are installed correctly
 /etc/init.d/vboxadd start
 lsmod | grep -q vboxguest

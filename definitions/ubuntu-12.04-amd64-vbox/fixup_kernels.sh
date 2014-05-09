@@ -1,23 +1,22 @@
 set -ex
 
-# Remove kernels < 3.8 because they don't work well with Docker.
+# Remove all kernels
+echo "Removing Quantal kernel"
+apt-get -y purge linux-generic-lts-quantal linux-generic-lts-quantal-eol-upgrade linux-image-generic-lts-quantal linux-headers-generic-lts-quantal
+echo "Removing Raring kernel"
+apt-get -y purge linux-generic-lts-raring linux-generic-lts-raring-eol-upgrade linux-image-generic-lts-raring linux-headers-generic-lts-raring
 echo "Removing Saucy kernel"
-apt-get -y purge linux-generic-lts-saucy linux-image-generic-lts-saucy linux-headers-generic-lts-saucy
+apt-get -y purge linux-generic-lts-saucy linux-generic-lts-saucy-eol-upgrade linux-image-generic-lts-saucy linux-headers-generic-lts-saucy
+echo "Removing all kernel images"
+dpkg --list | grep linux-image-3. | awk '{ print $2 }' | xargs apt-get -y purge
+dpkg --list | grep linux-headers-3. | awk '{ print $2 }' | xargs apt-get -y purge
 
-# Remove all kernels > 3.8 because VMWare Tools (and possibly older
-# VirtualBox guest additions) don't work on them.
-kernels=`dpkg --list | grep linux-image-3. | awk '{ print $2 }'`
-echo "Installed kernels:"
-echo "$kernels"
-for kernel in $kernels; do
-	minor_version=`echo "$kernel" | sed 's/^linux-image-//; s/-.*//' | cut -d. -f2`
-	if [[ "$minor_version" -gt 8 ]]; then
-		echo "Removing kernel $kernel"
-		apt-get -y purge "$kernel"
-	fi
-done
-
-# Install kernel 3.8 and all kernel updates.
-echo "Installing Raring kernel"
-apt-get -y install linux-generic-lts-raring linux-headers-generic-lts-raring
+echo "Installing Trusty kernel"
+apt-get -y install linux-generic-lts-trusty linux-headers-generic-lts-trusty
+# Install all kernel updates
 apt-get -y dist-upgrade
+
+echo "Installed kernels:"
+dpkg --list | grep linux-image-3. | awk '{ print $2 }'
+echo "Installed kernel headers:"
+dpkg --list | grep linux-headers-3. | awk '{ print $2 }'
