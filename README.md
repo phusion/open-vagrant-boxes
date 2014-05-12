@@ -9,7 +9,7 @@ This repository contains definitions for various Docker-friendly [Vagrant](http:
  * We provide more RAM by default: 1 GB.
  * We provide a bigger virtual hard disk: around 40 GB.
  * We use LVM so that partitioning is easier.
- * On the Ubuntu 12.04 version, our default kernel version is 3.8 (instead of 3.2), so that you can use [Docker](http://www.docker.io/) out-of-the-box.
+ * On the Ubuntu 12.04 version, our default kernel version is 3.13 (instead of 3.2), so that you can use [Docker](http://www.docker.io/) out-of-the-box.
  * [The memory cgroup and swap accounting](http://docs.docker.io/en/latest/installation/ubuntulinux/#memory-and-swap-accounting) are turned on, for some Docker features.
  * Chef is installed via the Ubuntu packages that they provide, instead of via RubyGems. This way the box doesn't have to come with Ruby by default, making the environment cleaner.
  * Our VMWare Fusion boxes recompile VMWare Tools on every kernel upgrade, so that Shared Folders keep working even if you change the kernel.
