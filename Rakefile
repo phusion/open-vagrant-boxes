@@ -157,10 +157,10 @@ DISTRO_RELEASES.each do |distro_release|
 	def create_release_task(name, distro_release, box_file)
 		desc "Release #{distro_release} #{name} box file to a public server"
 		task "release:#{distro_release}:#{name}" => box_file do
-			sh "ssh", WEBSERVER, "mkdir -p #{WEBROOT} && rm -rf #{WEBROOT}/tmp && mkdir #{WEBROOT}/tmp"
-			sh "scp #{box_file} #{WEBSERVER}:#{WEBROOT}/tmp/"
-			sh "md5sum #{box_file} | ssh #{WEBSERVER} tee #{WEBROOT}/tmp/#{box_file}.md5.txt"
-			sh "ssh", WEBSERVER, "mv #{WEBROOT}/tmp/* #{WEBROOT}/ && rm -rf #{WEBROOT}/tmp"
+			sh "ssh", WEBSERVER, "mkdir -p #{WEBROOT}"
+			sh "rsync --progress --partial-dir=.rsync-partial --human-readable " +
+				"#{box_file} #{WEBSERVER}:#{WEBROOT}/#{box_file}"
+			sh "md5sum #{box_file} | ssh #{WEBSERVER} tee #{WEBROOT}/#{box_file}.md5.txt"
 		end
 	end
 
