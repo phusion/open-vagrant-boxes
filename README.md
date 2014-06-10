@@ -14,7 +14,7 @@ This repository contains definitions for various Docker-friendly [Vagrant](http:
  * Chef is installed via the Ubuntu packages that they provide, instead of via RubyGems. This way the box doesn't have to come with Ruby by default, making the environment cleaner.
  * Our VMWare Fusion boxes recompile VMWare Tools on every kernel upgrade, so that Shared Folders keep working even if you change the kernel.
 
-These base boxes are automatically built from [Veewee](https://github.com/jedi4ever/veewee) definitions. These definitions makes building boxes quick and unambigious. The entire building process is described in the definitions; no manual intervention is required.
+These base boxes are automatically built from [Veewee](https://github.com/jedi4ever/veewee) definitions. These definitions make building boxes quick and unambigious. The entire building process is described in the definitions; no manual intervention is required.
 
 We provide prebuilt boxes at https://oss-binaries.phusionpassenger.com/vagrant/boxes/, but you can build them yourself if you so wish.
 
