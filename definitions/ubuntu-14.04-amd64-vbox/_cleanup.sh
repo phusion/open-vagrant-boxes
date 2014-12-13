@@ -15,6 +15,7 @@ apt-get -y autoremove
 apt-get clean
 
 # Clean up tmp
+sleep 5
 rm -rf /tmp/*
 
 # Removing leftover leases and persistent rules
