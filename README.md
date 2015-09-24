@@ -53,6 +53,7 @@ On older Vagrant versions, you can modify your Vagrantfile to use our boxes. Her
         #override.vm.box_url = "https://oss-binaries.phusionpassenger.com/vagrant/boxes/latest/ubuntu-12.04-amd64-vmwarefusion.box"
       end
 
+      # Only run the provisioning on the first 'vagrant up'
       if Dir.glob("#{File.dirname(__FILE__)}/.vagrant/machines/default/*/id").empty?
         # Install Docker
         pkg_cmd = "wget -q -O - https://get.docker.io/gpg | apt-key add -;" \
