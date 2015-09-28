@@ -21,3 +21,7 @@ chmod 700 /root/.ssh
 cp /home/vagrant/.ssh/authorized_keys /root/.ssh/authorized_keys
 chmod 600 /root/.ssh/authorized_keys
 chown root:root /root/.ssh/authorized_keys
+
+# Fix "not a tty" message
+# https://github.com/mitchellh/vagrant/issues/1673#issuecomment-28287711
+sed -i 's/^mesg n$/tty -s \&\& mesg n/g' /root/.profile
