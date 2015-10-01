@@ -8,7 +8,7 @@ apt-get -y install build-essential vim curl
 
 # Set up sudo
 ( cat <<'EOP'
-%vagrant ALL=NOPASSWD:ALL
+%vagrant ALL=(ALL) NOPASSWD:ALL
 EOP
 ) > /tmp/vagrant
 chmod 0440 /tmp/vagrant
